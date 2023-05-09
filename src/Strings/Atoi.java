@@ -2,7 +2,7 @@ package Strings;
 
 public class Atoi {
     public static void main(String[] args) {
-        System.out.println("String: 42 " + myAtoi("42-43"));
+        System.out.println("" + myAtoi("-2147483647"));
     }
 
     /*
@@ -15,42 +15,41 @@ public class Atoi {
     public static int myAtoi(String s) {
 
         char[] arr = s.trim().toCharArray();
-        int ans = 0;
-        int tense = 0;
+        long ans = 0;
         boolean flag = false;
+        boolean isNegative = false;
+        boolean isString = false;
 
         for(int i=0; i<arr.length; i++) {
-            if(arr[i] == '-' && i+1 < arr.length && arr[i+1] != ' ') {
-                // Then preceeding this might be a number...
-                ans = -1;
-                flag = true;
-            }else {
-                flag = false;
-            }
 
-            if(arr[i] == '+' && i+1 < arr.length && arr[i+1] != ' ') {
-                // Then preceeding this might be a number...
-                ans = +1;
-                flag = true;
-            }else {
-                flag = false;
-            }
-
-            if(isNumber(arr[i])) {
-                if (ans == 0) {
-                    ans = (arr[i] - '0')*(int)Math.pow(10, tense);
-                }else {
-                    ans = ans + (arr[i] - '0')*(int)Math.pow(10, tense);
+            if(isNumber(arr[i]) && !isString) {
+                // Read the number
+                ans = ans*10 + (arr[i] - '0');
+                if(isNegative && (-1*ans) <= Integer.MIN_VALUE) {
+                    return Integer.MIN_VALUE;
+                }else if(!isNegative && ans >= Integer.MAX_VALUE) {
+                    return Integer.MAX_VALUE;
                 }
-                tense++;
+                flag = true;
             }else if(flag) {
                 // Flag is true but char is not a number...reset
-                ans = 0;
                 break;
+            }
+
+            if(arr[i] == '-' && i+1 < arr.length && isNumber(arr[i+1])) {
+                // Then preceeding this might be a number...
+                isNegative = true;
+                flag = true;
+            }else if(arr[i] == '+' && i+1 < arr.length && isNumber(arr[i+1])) {
+                // Then preceeding this might be a number...
+                isNegative = false;
+                flag = true;
+            }else if (arr[i] != ' ' && !isNumber(arr[i])) {
+                isString = true;
             }
         }
 
-        return ans;
+        return (int) ((isNegative) ? -1*ans : ans);
     }
 
     private static boolean isNumber(char c) {
